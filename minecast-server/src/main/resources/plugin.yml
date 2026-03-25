@@ -1,0 +1,13 @@
+name: MineCast
+version: '1.0.0'
+main: com.minecast.server.MineCastPlugin
+api-version: '1.21'
+commands:
+  cast:
+    description: "TTS를 통해 월드 전체에 음성을 재생합니다"
+    permission: minecast.use
+    usage: /cast <텍스트>
+permissions:
+  minecast.use:
+    description: "/cast 명령어 사용 가능"
+    default: op

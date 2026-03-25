@@ -1,0 +1,8 @@
+typecast:
+  api-key: "YOUR_API_KEY"
+  actor-id: "YOUR_ACTOR_ID"
+  api-url: "https://typecast.ai/api/speak"
+
+cast:
+  cooldown-seconds: 10
+  max-text-length: 200
