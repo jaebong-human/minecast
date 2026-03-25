@@ -7,11 +7,11 @@
   "authors": [],
   "environment": "client",
   "entrypoints": {
-    "client": ["com.minecast.client.MineCastClient"]
+    "client": ["ai.jaebong.minecast.client.MineCastClient"]
   },
   "depends": {
     "fabricloader": ">=0.16.0",
-    "minecraft": "~1.21.4",
+    "minecraft": "26.1",
     "fabric-networking-api-v1": "*"
   }
 }

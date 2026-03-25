@@ -1,29 +1,28 @@
 // minecast-client/build.gradle
 plugins {
-    id 'fabric-loom' version '1.7-SNAPSHOT'
+    id 'net.fabricmc.fabric-loom' version '1.15.5'
 }
 
-group = 'com.minecast'
+group = 'ai.jaebong'
 version = '1.0.0'
 
 java {
-    toolchain { languageVersion = JavaLanguageVersion.of(21) }
+    toolchain { languageVersion = JavaLanguageVersion.of(25) }
 }
 
 loom {
-    splitEnvironmentSourceSets()
     mods { minecast { sourceSet sourceSets.main } }
 }
 
 repositories {
     mavenCentral()
+    maven { url = 'https://maven.fabricmc.net/' }
 }
 
 dependencies {
-    minecraft 'com.mojang:minecraft:1.21.4'
-    mappings loom.officialMojangMappings()
-    modImplementation 'net.fabricmc:fabric-loader:0.16.9'
-    modImplementation fabricApi.module('fabric-networking-api-v1', '0.106.1+1.21.4')
+    minecraft 'com.mojang:minecraft:26.1'
+    implementation 'net.fabricmc:fabric-loader:0.18.4'
+    implementation 'net.fabricmc.fabric-api:fabric-api:0.143.15+26.1'
 
     // JLayer: MP3 디코딩 (fat jar에 포함)
     implementation 'javazoom:jlayer:1.0.1'
@@ -31,6 +30,7 @@ dependencies {
 
     testImplementation platform('org.junit:junit-bom:5.10.2')
     testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 test { useJUnitPlatform() }

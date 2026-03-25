@@ -1,0 +1,29 @@
+# Gradle
+.gradle/
+build/
+**/build/
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Eclipse
+.classpath
+.project
+.settings/
+
+# Fabric Loom
+run/
+**/run/
+
+# macOS
+.DS_Store
+
+# 서버 로컬 설정
+fabric-server-launcher.properties
+
+# 빌드된 JAR (Releases에서 배포)
+*.jar
+!gradle/wrapper/gradle-wrapper.jar

@@ -1,3 +1,10 @@
 // settings.gradle
+pluginManagement {
+    repositories {
+        maven { url = 'https://maven.fabricmc.net/' }
+        gradlePluginPortal()
+    }
+}
+
 rootProject.name = 'minecast'
 include('minecast-server', 'minecast-client')

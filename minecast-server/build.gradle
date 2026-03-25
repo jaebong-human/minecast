@@ -1,40 +1,34 @@
 // minecast-server/build.gradle
 plugins {
-    id 'java'
-    id 'com.github.johnrengelman.shadow' version '8.1.1'
+    id 'net.fabricmc.fabric-loom' version '1.15.5'
 }
 
-group = 'com.minecast'
+group = 'ai.jaebong'
 version = '1.0.0'
 
 java {
-    toolchain { languageVersion = JavaLanguageVersion.of(21) }
+    toolchain { languageVersion = JavaLanguageVersion.of(25) }
 }
 
 repositories {
     mavenCentral()
-    maven { url = 'https://repo.papermc.io/repository/maven-public/' }
+    maven { url = 'https://maven.fabricmc.net/' }
 }
 
 dependencies {
-    compileOnly 'io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT'
-    implementation 'com.squareup.okhttp3:okhttp:4.12.0'
+    minecraft 'com.mojang:minecraft:26.1'
+    implementation 'net.fabricmc:fabric-loader:0.18.4'
+    implementation 'net.fabricmc.fabric-api:fabric-api:0.143.15+26.1'
+
+    // org.json: 요청 바디 빌드용 (JIJ로 번들)
     implementation 'org.json:json:20240303'
+    include 'org.json:json:20240303'
 
     testImplementation platform('org.junit:junit-bom:5.10.2')
     testImplementation 'org.junit.jupiter:junit-jupiter'
-    testImplementation 'com.github.seeseemelk:MockBukkit-v1.21:3.133.0'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     testImplementation 'com.squareup.okhttp3:mockwebserver:4.12.0'
     testImplementation 'org.mockito:mockito-core:5.11.0'
 }
 
 test { useJUnitPlatform() }
-
-shadowJar {
-    archiveClassifier = ''  // shadow JAR이 기본 아티팩트가 됨
-    relocate 'okhttp3', 'com.minecast.shadow.okhttp3'
-    relocate 'okio', 'com.minecast.shadow.okio'
-    relocate 'org.json', 'com.minecast.shadow.json'
-}
-
-jar.enabled = false  // 비shaded JAR 빌드 비활성화

@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "id": "minecast-server",
+  "version": "1.0.0",
+  "name": "MineCast Server",
+  "description": "TTS broadcast server mod",
+  "environment": "*",
+  "entrypoints": {
+    "main": ["ai.jaebong.minecast.server.MineCastServerMod"]
+  },
+  "depends": {
+    "fabricloader": ">=0.18.4",
+    "fabric-api": "*",
+    "minecraft": "26.1"
+  }
+}
