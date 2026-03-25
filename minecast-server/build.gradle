@@ -1,0 +1,37 @@
+// minecast-server/build.gradle
+plugins {
+    id 'java'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
+}
+
+group = 'com.minecast'
+version = '1.0.0'
+
+java {
+    toolchain { languageVersion = JavaLanguageVersion.of(21) }
+}
+
+repositories {
+    mavenCentral()
+    maven { url = 'https://repo.papermc.io/repository/maven-public/' }
+}
+
+dependencies {
+    compileOnly 'io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT'
+    implementation 'com.squareup.okhttp3:okhttp:4.12.0'
+    implementation 'org.json:json:20240303'
+
+    testImplementation platform('org.junit:junit-bom:5.10.2')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation 'com.github.seeseemelk:MockBukkit-v1.21:3.133.0'
+    testImplementation 'com.squareup.okhttp3:mockwebserver:4.12.0'
+    testImplementation 'org.mockito:mockito-core:5.11.0'
+}
+
+test { useJUnitPlatform() }
+
+shadowJar {
+    relocate 'okhttp3', 'com.minecast.shadow.okhttp3'
+    relocate 'okio', 'com.minecast.shadow.okio'
+    relocate 'org.json', 'com.minecast.shadow.json'
+}

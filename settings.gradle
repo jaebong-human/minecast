@@ -1,0 +1,3 @@
+// settings.gradle
+rootProject.name = 'minecast'
+include('minecast-server', 'minecast-client')

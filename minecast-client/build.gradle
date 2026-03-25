@@ -1,0 +1,36 @@
+// minecast-client/build.gradle
+plugins {
+    id 'fabric-loom' version '1.7-SNAPSHOT'
+}
+
+group = 'com.minecast'
+version = '1.0.0'
+
+java {
+    toolchain { languageVersion = JavaLanguageVersion.of(21) }
+}
+
+loom {
+    splitEnvironmentSourceSets()
+    mods { minecast { sourceSet sourceSets.main } }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    minecraft 'com.mojang:minecraft:1.21.4'
+    mappings loom.officialMojangMappings()
+    modImplementation 'net.fabricmc:fabric-loader:0.16.9'
+    modImplementation fabricApi.module('fabric-networking-api-v1', '0.106.1+1.21.4')
+
+    // JLayer: MP3 디코딩 (fat jar에 포함)
+    implementation 'javazoom:jlayer:1.0.1'
+    include 'javazoom:jlayer:1.0.1'
+
+    testImplementation platform('org.junit:junit-bom:5.10.2')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+}
+
+test { useJUnitPlatform() }
