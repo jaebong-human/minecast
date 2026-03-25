@@ -31,7 +31,10 @@ dependencies {
 test { useJUnitPlatform() }
 
 shadowJar {
+    archiveClassifier = ''  // shadow JAR이 기본 아티팩트가 됨
     relocate 'okhttp3', 'com.minecast.shadow.okhttp3'
     relocate 'okio', 'com.minecast.shadow.okio'
     relocate 'org.json', 'com.minecast.shadow.json'
 }
+
+jar.enabled = false  // 비shaded JAR 빌드 비활성화
