@@ -11,8 +11,12 @@ public record MinecastPayload(byte[] data) implements CustomPacketPayload {
 
     public static final StreamCodec<FriendlyByteBuf, MinecastPayload> CODEC =
         StreamCodec.of(
-            (buf, payload) -> buf.writeByteArray(payload.data()),
-            buf -> new MinecastPayload(buf.readByteArray())
+            (buf, payload) -> buf.writeBytes(payload.data()),
+            buf -> {
+                byte[] bytes = new byte[buf.readableBytes()];
+                buf.readBytes(bytes);
+                return new MinecastPayload(bytes);
+            }
         );
 
     @Override

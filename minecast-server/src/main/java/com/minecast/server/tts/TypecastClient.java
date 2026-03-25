@@ -2,6 +2,7 @@ package com.minecast.server.tts;
 
 import com.minecast.server.config.PluginConfig;
 import okhttp3.*;
+import okhttp3.ResponseBody;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -45,7 +46,9 @@ public class TypecastClient {
             if (!resp.isSuccessful()) {
                 throw new IOException("Typecast API error: " + resp.code());
             }
-            JSONObject json = new JSONObject(resp.body().string());
+            ResponseBody body = resp.body();
+            if (body == null) throw new IOException("Empty response from Typecast API");
+            JSONObject json = new JSONObject(body.string());
             audioUrl = json.getJSONObject("result").getString("speak_v2_url");
         }
 
@@ -54,7 +57,9 @@ public class TypecastClient {
             if (!resp.isSuccessful()) {
                 throw new IOException("Audio download error: " + resp.code());
             }
-            return resp.body().bytes();
+            ResponseBody audioBody = resp.body();
+            if (audioBody == null) throw new IOException("Empty audio response");
+            return audioBody.bytes();
         }
     }
 }

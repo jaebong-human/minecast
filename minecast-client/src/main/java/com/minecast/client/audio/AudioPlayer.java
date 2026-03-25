@@ -12,17 +12,14 @@ import java.nio.ByteBuffer;
 public class AudioPlayer {
     private static final Logger LOGGER = LoggerFactory.getLogger(AudioPlayer.class);
 
-    private int alSource = -1;
-    private int alBuffer = -1;
+    private volatile int alSource = -1;
+    private volatile int alBuffer = -1;
+    private volatile Thread playThread = null;
 
-    /**
-     * MP3 bytes를 디코딩하여 OpenAL로 재생한다.
-     * 이전 재생 중이면 중단하고 새로 시작한다.
-     */
     public void play(byte[] mp3Bytes) {
         stopAndCleanup();
 
-        Thread playThread = new Thread(() -> {
+        Thread thread = new Thread(() -> {
             try {
                 byte[] pcm = decodeMp3ToPcm(mp3Bytes);
                 int sampleRate = getSampleRate(mp3Bytes);
@@ -31,43 +28,53 @@ public class AudioPlayer {
                 LOGGER.warn("[MineCast] MP3 재생 실패: {}", e.getMessage());
             }
         }, "minecast-audio");
-        playThread.setDaemon(true);
-        playThread.start();
+        thread.setDaemon(true);
+        playThread = thread;
+        thread.start();
     }
 
     private byte[] decodeMp3ToPcm(byte[] mp3) throws Exception {
         Bitstream bitstream = new Bitstream(new ByteArrayInputStream(mp3));
         Decoder decoder = new Decoder();
         ByteArrayOutputStream pcmOut = new ByteArrayOutputStream();
-
-        Header frame;
-        while ((frame = bitstream.readFrame()) != null) {
-            SampleBuffer output = (SampleBuffer) decoder.decodeFrame(frame, bitstream);
-            short[] samples = output.getBuffer();
-            for (short s : samples) {
-                pcmOut.write(s & 0xFF);
-                pcmOut.write((s >> 8) & 0xFF);
+        try {
+            Header frame;
+            while ((frame = bitstream.readFrame()) != null) {
+                SampleBuffer output = (SampleBuffer) decoder.decodeFrame(frame, bitstream);
+                short[] samples = output.getBuffer();
+                for (short s : samples) {
+                    pcmOut.write(s & 0xFF);
+                    pcmOut.write((s >> 8) & 0xFF);
+                }
+                bitstream.closeFrame();
             }
-            bitstream.closeFrame();
+        } finally {
+            bitstream.close();
         }
         return pcmOut.toByteArray();
     }
 
     private int getSampleRate(byte[] mp3) throws Exception {
         Bitstream bs = new Bitstream(new ByteArrayInputStream(mp3));
-        Header header = bs.readFrame();
-        return header != null ? (int) header.frequency() : 44100;
+        try {
+            Header header = bs.readFrame();
+            return header != null ? (int) header.frequency() : 44100;
+        } finally {
+            bs.close();
+        }
     }
 
     private void playPcm(byte[] pcm, int sampleRate) {
-        alBuffer = AL10.alGenBuffers();
-        ByteBuffer buf = ByteBuffer.allocateDirect(pcm.length);
-        buf.put(pcm).flip();
-        AL10.alBufferData(alBuffer, AL10.AL_FORMAT_STEREO16, buf, sampleRate);
+        int buf = AL10.alGenBuffers();
+        alBuffer = buf;
+        ByteBuffer byteBuf = ByteBuffer.allocateDirect(pcm.length);
+        byteBuf.put(pcm).flip();
+        AL10.alBufferData(buf, AL10.AL_FORMAT_STEREO16, byteBuf, sampleRate);
 
-        alSource = AL10.alGenSources();
-        AL10.alSourcei(alSource, AL10.AL_BUFFER, alBuffer);
-        AL10.alSourcePlay(alSource);
+        int src = AL10.alGenSources();
+        alSource = src;
+        AL10.alSourcei(src, AL10.AL_BUFFER, buf);
+        AL10.alSourcePlay(src);
 
         int state;
         do {
@@ -75,20 +82,39 @@ public class AudioPlayer {
                 Thread.currentThread().interrupt();
                 break;
             }
-            state = AL10.alGetSourcei(alSource, AL10.AL_SOURCE_STATE);
+            state = AL10.alGetSourcei(src, AL10.AL_SOURCE_STATE);
         } while (state == AL10.AL_PLAYING);
 
-        stopAndCleanup();
+        cleanupSource(src, buf);
     }
 
-    public void stopAndCleanup() {
-        if (alSource != -1) {
-            AL10.alSourceStop(alSource);
-            AL10.alDeleteSources(alSource);
+    private synchronized void cleanupSource(int src, int buf) {
+        if (src != -1 && alSource == src) {
+            AL10.alSourceStop(src);
+            AL10.alDeleteSources(src);
             alSource = -1;
         }
-        if (alBuffer != -1) {
-            AL10.alDeleteBuffers(alBuffer);
+        if (buf != -1 && alBuffer == buf) {
+            AL10.alDeleteBuffers(buf);
+            alBuffer = -1;
+        }
+    }
+
+    public synchronized void stopAndCleanup() {
+        Thread t = playThread;
+        if (t != null) {
+            t.interrupt();
+            playThread = null;
+        }
+        int src = alSource;
+        int buf = alBuffer;
+        if (src != -1) {
+            AL10.alSourceStop(src);
+            AL10.alDeleteSources(src);
+            alSource = -1;
+        }
+        if (buf != -1) {
+            AL10.alDeleteBuffers(buf);
             alBuffer = -1;
         }
     }

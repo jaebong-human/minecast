@@ -21,7 +21,7 @@ public class MineCastPlugin extends JavaPlugin {
         executor = Executors.newFixedThreadPool(10);
 
         TypecastClient ttsClient = new TypecastClient(pluginConfig);
-        AudioBroadcaster broadcaster = new AudioBroadcaster();
+        AudioBroadcaster broadcaster = new AudioBroadcaster(this);
         CastCommand castCommand = new CastCommand(pluginConfig, ttsClient, broadcaster, executor);
 
         getCommand("cast").setExecutor(castCommand);
